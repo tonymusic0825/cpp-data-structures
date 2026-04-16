@@ -1,5 +1,9 @@
 #include <iostream>
 #include <cassert>
+#include <vector>
+#include <random>
+#include <chrono>
+#include <algorithm>
 #include <stdexcept>
 
 using namespace std;
@@ -48,17 +52,19 @@ class CustomArray {
             
             if (this == &other) return *this; // Self-assignment
             
-            data_ = new T[other.capacity_]; // Alocate first before deleting!
+            T* temp = new T[other.capacity_]; // Alocate first before deleting!
 
+            
+            for (size_t i = 0; i < other.size_; ++i) {
+                temp[i] = other.data_[i];
+            }
+            
             delete[] data_;
 
+            data_ = temp;
             size_ = other.size_;
             capacity_ = other.capacity_;
-
-            for (size_t i = 0; i < other.size_; ++i) {
-                data_[i] = other.data_[i];
-            }
-
+            
             return *this; 
         }
 
@@ -86,7 +92,7 @@ class CustomArray {
 
             other.data_ = nullptr;
             other.size_ = 0;
-            other.capacity = 0;
+            other.capacity_ = 0;
 
             return *this; 
         }
@@ -153,7 +159,7 @@ class CustomArray {
 
         void reserve(size_t new_cap) {
 
-            if (capacity >= new_cap) { return; }
+            if (capacity_ >= new_cap) { return; }
 
             T* temp = new T[new_cap];
 
@@ -170,18 +176,203 @@ class CustomArray {
         // Raw access
         T* data() { return data_; }
 
-        // Insertions
 
+        // Modifiers
+        void push_back(const T& val) {
+
+            // Check if array is currently full
+            if (size_ == capacity_) { 
+                
+                T* temp = new T[capacity_*2];
+
+                for (size_t i = 0; i < size_; ++i) {
+                    temp[i] = move(data_[i]);
+                }
+
+                delete[] data_;
+                data_ = temp;
+                capacity_ *= 2; 
+            }
+            
+            data_[size_++] = val;
+        }
+
+        void pop_back() {
+            if (size_ > 0) {
+                data_[size_ - 1].~T();
+
+                --size_;
+            }
+        }
+
+        void erase(size_t index) {
+            if (index >= size_) {
+                throw std::out_of_range("CustomArray: erase() index out of bounds");
+            }
+
+            data_[index].~T();
+
+            for (size_t i = index; i < size_ - 1; ++i) {
+                data_[i] = move(data_[i + 1]);
+            }
+        }
+
+        void insert(size_t index, const T& val) {
+            if (index >= size_) {
+                throw std::out_of_range("CustomArray: insert() index out of bounds");
+            }
+
+            // Check if current array is full
+            if (size_ == capacity_) { 
+                
+                T* temp = new T[capacity_*2];
+
+                for (size_t i = 0; i < index; ++i) {
+                    temp[i] = move(data_[i]);
+                }
+
+                temp[index] = val;
+
+                for (size_t i = index + 1; i < size_; ++i) {
+                    temp[i] = move(data_[i]);
+                }
+
+                delete[] data_;
+                data_ = temp;
+                capacity_ *= 2; 
+
+            } else {
+                for (size_t i = size_ - 1; i > index; --i) {
+                    data_[i + 1] = move(data_[i]); 
+                }
+
+                data_[index] = val;
+            }
+        }
+
+        void clear() {
+            for (size_t i = 0; i < size_; ++i) {
+                data_[i].~T();
+            }
+
+            size_ = 0;
+        }
 
 };
 
 
+template <typename T>
 
+// Test code
+bool compare_parity(std::vector<T>& ref, CustomArray<T>& custom) {
+    if (ref.size() != custom.size()) return false;
+    for (size_t i = 0; i < ref.size(); ++i) {
+        if (ref[i] != custom[i]) return false;
+    }
+    return true;
+}
 
 
 int main() {
 
-    CustomArray<int> test_arr;
+    int total_ops = 10000000;
+
+    std::mt19937 rng(1337);
+    std::uniform_int_distribution<int> op_dist(0, 5);
+    std::uniform_int_distribution<int> val_dist(1, 1000000);
+
+    // Pre-generate operations so both containers get identical workload
+    std::vector<int> ops(total_ops);
+    std::vector<int> vals(total_ops);
+
+    for (int i = 0; i < total_ops; ++i) {
+        ops[i] = op_dist(rng);
+        vals[i] = val_dist(rng);
+    }
+
+    // -------------------------------
+    // Test std::vector
+    // -------------------------------
+    {
+        std::vector<int> ref_vec;
+
+        auto start = std::chrono::high_resolution_clock::now();
+
+        for (int i = 0; i < total_ops; ++i) {
+            int op = ops[i];
+            int val = vals[i];
+
+            switch (op) {
+                case 0:
+                    ref_vec.push_back(val);
+                    break;
+                case 1:
+                    if (!ref_vec.empty()) ref_vec.pop_back();
+                    break;
+                case 2:
+                    ref_vec.reserve(val % 2000);
+                    break;
+                case 3:
+                    if (!ref_vec.empty()) {
+                        size_t idx = val % ref_vec.size();
+                        ref_vec[idx] = val;
+                    }
+                    break;
+                case 4:
+                    if (i % 10000 == 0) {
+                        ref_vec.clear();
+                    }
+                    break;
+            }
+        }
+
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> diff = end - start;
+
+        std::cout << "[std::vector] Time: " << diff.count() << " seconds\n";
+    }
+
+    // -------------------------------
+    // Test CustomArray
+    // -------------------------------
+    {
+        CustomArray<int> test_arr;
+
+        auto start = std::chrono::high_resolution_clock::now();
+
+        for (int i = 0; i < total_ops; ++i) {
+            int op = ops[i];
+            int val = vals[i];
+
+            switch (op) {
+                case 0:
+                    test_arr.push_back(val);
+                    break;
+                case 1:
+                    if (!test_arr.empty()) test_arr.pop_back();
+                    break;
+                case 2:
+                    test_arr.reserve(val % 2000);
+                    break;
+                case 3:
+                    if (!test_arr.empty()) {
+                        size_t idx = val % test_arr.size();
+                        test_arr[idx] = val;
+                    }
+                    break;
+                case 4:
+                    if (i % 10000 == 0) {
+                        test_arr.clear();
+                    }
+                    break;
+            }
+        }
+
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> diff = end - start;
+
+        std::cout << "[CustomArray] Time: " << diff.count() << " seconds\n";
+    }
 
     return 0;
-} 
+}
