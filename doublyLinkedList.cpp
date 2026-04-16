@@ -59,7 +59,7 @@ class DoublyLinkedList {
 
         DoublyLinkedList& operator=(const DoublyLinkedList& other) {
             
-            if (this == &other) { return this*; }
+            if (this == &other) { return this; }
             
             // Free all memory of 'this' 
             free_mem();
@@ -76,7 +76,7 @@ class DoublyLinkedList {
 
         DoublyLinkedList& operator=(DoublyLinkedList&& other) noexcept {
 
-            if (this == &other) { return this*; }
+            if (this == &other) { return this; }
 
             // Free all memory of 'this'
             free_mem();
@@ -92,6 +92,77 @@ class DoublyLinkedList {
 
             return this; 
         }
+
+
+        // Element Access
+        Node* front() { return head_; }
+        Node* back() { return tail_; }
+
+        // Modifiers
+        void push_front(T val) {
+
+            Node* temp = new Node{val, nullptr, head_};
+
+            if (head_) {
+                head_->prev = temp;
+            } else {
+                tail_ = temp;
+            }
+
+            head_ = temp; 
+            size_++;
+        }
+
+        void push_back(T val) {
+            Node* temp = new Node{val, tail_, nullptr};
+
+            if (tail_) {
+                tail_->next = temp;
+            } else {
+                head_ = temp;
+            }
+
+            tail_ = temp;
+            size_++;
+        }
+
+        void pop_front() {
+            if (!head_) return;
+
+            Node* temp = head_;
+            head_ = head_->next;
+
+            if (head_) {
+                head_->prev = nullptr;
+            } else {
+                tail_ = nullptr;  // list became empty
+            }
+
+            delete temp;
+            size_--;
+        }
+
+        void pop_back() {
+            if (!tail_) return;
+
+            Node* temp = tail_;
+            tail_ = tail_->prev;
+
+            if (tail_) {
+                tail_->next = nullptr;
+            } else {
+                head_ = nullptr;
+            }
+
+            delete temp;
+            size_--;
+        }
+
+        void clear() {
+            free_mem();
+        }
+
+
 
 
 
