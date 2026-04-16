@@ -8,71 +8,52 @@ template <typename T>
 
 class CustomArray {
     private:
-        T* data;
-        size_t size;
-        size_t capacity;
+        T* data_;
+        size_t size_;
+        size_t capacity_;
 
     public:
+        CustomArray()
+            : data_(new T[16]), size_(0), capacity_(16) {}
 
-        CustomArray() : data(new T[16]), size(0), capacity(16) {}
-
+        // Element access
         T& operator[](size_t index) {
-            
-            if (index < size || index >= size) {
-                throw std::out_of_range("CustomArray: Index out of bounds");
+            if (index >= size_) {
+                throw std::out_of_range("CustomArray: index out of bounds");
             }
-
-            return data[index];
+            return data_[index];
         }
 
-        T front() {
-
-            if (size < 1) {
-                throw std::out_of_range("CustomArray:front array is empty")
+        T& at(size_t index) {
+            if (index >= size_) {
+                throw std::out_of_range("CustomArray: index out of bounds");
             }
-
-            return data[0];
+            return data_[index];
         }
 
-        T back() {
-
-            if (size < 1) {
-                throw std::out_of_range("CustomArray:back array is empty")
+        T& front() {
+            if (empty()) {
+                throw std::out_of_range("CustomArray: front() on empty array");
             }
-
-            return data[size-1];
+            return data_[0];
         }
 
-        T at(size_t index) {
-            
-            if (index < 0 || index >= size) {
-                throw std::out_of_range("CustomArray: Index out of bounds");
+        T& back() {
+            if (empty()) {
+                throw std::out_of_range("CustomArray: back() on empty array");
             }
-
-            return data[index];
+            return data_[size_ - 1];
         }
 
-        bool empty() {
-            return (size == 0);
-        }
+        // Capacity
+        bool empty() const { return size_ == 0; }
+        size_t size() const { return size_; }
+        size_t capacity() const { return capacity_; }
 
-        size_t size() {
-            return size;
-        }
+        // Raw access
+        T* data() { return data_; }
 
-        size_t capacity() {
-            return capacity;
-        }
-
-        T* data() {
-            return data;
-        }
-
-        
-
-
-
-
+        // Insertions
 };
 
 
