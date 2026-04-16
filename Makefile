@@ -1,11 +1,11 @@
 # Variables
 CXX = g++
-CXXFLAGS = -Wall -Wextra -g -Wpedantic
+CXXFLAGS = -Wall -Wextra -g -Wpedantic -O3
 
 all: main
 
-main: dynamicArray.cpp
-	$(CXX) $(CXXFLAGS) -o main dynamicArray.cpp
+main: doublyLinkedList.cpp
+	$(CXX) $(CXXFLAGS) -o main doublyLinkedList.cpp
 
 clean:
 	rm -f main
