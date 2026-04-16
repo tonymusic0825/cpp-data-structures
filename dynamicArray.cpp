@@ -215,10 +215,12 @@ class CustomArray {
             for (size_t i = index; i < size_ - 1; ++i) {
                 data_[i] = move(data_[i + 1]);
             }
+
+            size_--;
         }
 
         void insert(size_t index, const T& val) {
-            if (index >= size_) {
+            if (index > size_) {
                 throw std::out_of_range("CustomArray: insert() index out of bounds");
             }
 
@@ -233,8 +235,8 @@ class CustomArray {
 
                 temp[index] = val;
 
-                for (size_t i = index + 1; i < size_; ++i) {
-                    temp[i] = move(data_[i]);
+                for (size_t i = index; i < size_; ++i) {
+                    temp[i + 1] = move(data_[i]);
                 }
 
                 delete[] data_;
@@ -242,12 +244,14 @@ class CustomArray {
                 capacity_ *= 2; 
 
             } else {
-                for (size_t i = size_ - 1; i > index; --i) {
-                    data_[i + 1] = move(data_[i]); 
+                for (size_t i = size_; i > index; --i) {
+                    data_[i] = move(data_[i - 1]); 
                 }
 
                 data_[index] = val;
             }
+
+            size_++;
         }
 
         void clear() {
@@ -275,7 +279,7 @@ bool compare_parity(std::vector<T>& ref, CustomArray<T>& custom) {
 
 int main() {
 
-    int total_ops = 10000000;
+    int total_ops = 100000000;
 
     std::mt19937 rng(1337);
     std::uniform_int_distribution<int> op_dist(0, 5);
