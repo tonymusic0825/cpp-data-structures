@@ -126,10 +126,53 @@ class CustomArray {
         size_t size() const { return size_; }
         size_t capacity() const { return capacity_; }
 
+        void shrink_to_fit() {
+
+            if (size_ == capacity_) { return; }
+
+            // If empty
+            if (size_ == 0) {
+                delete[] data;
+                data_ = nullptr;
+                capacity_ = 0;
+                return;                 
+            }
+
+            T* temp = new T[size_];
+
+            for (size_t i = 0; i < size_; ++i) {
+                temp[i] = std::move(data_[i]);
+            }
+
+            delete[] data_;
+
+
+            data_ = temp; 
+            capacity_ = size_;
+        }
+
+        void reserve(size_t new_cap) {
+
+            if (capacity >= new_cap) { return; }
+
+            T* temp = new T[new_cap];
+
+            for (size_t i = 0; i < size_; ++i) {
+                temp[i] = move(data_[i]);
+            }
+
+            delete[] data_;
+            data_ = temp;
+            capacity_ = new_cap;
+        }
+
+
         // Raw access
         T* data() { return data_; }
 
         // Insertions
+
+
 };
 
 
