@@ -32,6 +32,39 @@ class DoublyLinkedList {
         }
     
     public:
+
+        // Iterator
+        class iterator {
+            private:
+                Node* cur_;
+
+            public:
+                iterator(Node* node) : cur_(node) {}
+
+                T& operator*() { return cur_->data; }
+
+                iterator& operator++() {
+                    cur_ = cur_->next;
+
+                    return *this; 
+                }
+
+                iterator& operator--() {
+                    cur_ = cur_->prev;
+                    
+                    return *this;
+                }
+
+                bool operator==(const iterator& other) const {
+                    return cur_ == other.cur_;
+                }
+
+                bool operator!=(const iterator& other) const {
+                    return cur_ != other.cur_;
+                }
+
+                friend class DoublyLinkedList<T>;
+        };
         
         // Rule of Five
         DoublyLinkedList() : head_(nullptr), tail_(nullptr), size_(0) {}
@@ -161,10 +194,6 @@ class DoublyLinkedList {
         void clear() {
             free_mem();
         }
-
-
-
-
 
 };
 
