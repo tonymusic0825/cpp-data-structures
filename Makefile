@@ -4,8 +4,8 @@ CXXFLAGS = -Wall -Wextra -g -Wpedantic -O3
 
 all: main
 
-main: doublyLinkedList.cpp
-	$(CXX) $(CXXFLAGS) -o main doublyLinkedList.cpp
+main: customMap.cpp
+	$(CXX) $(CXXFLAGS) -o main customMap.cpp
 
 clean:
 	rm -f main
