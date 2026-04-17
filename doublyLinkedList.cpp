@@ -132,7 +132,7 @@ class DoublyLinkedList {
         Node* back() { return tail_; }
 
         // Modifiers
-        void push_front(T val) {
+        void push_front(T& val) {
 
             Node* temp = new Node{val, nullptr, head_};
 
@@ -146,7 +146,7 @@ class DoublyLinkedList {
             size_++;
         }
 
-        void push_back(T val) {
+        void push_back(T& val) {
             Node* temp = new Node{val, tail_, nullptr};
 
             if (tail_) {
@@ -193,6 +193,41 @@ class DoublyLinkedList {
 
         void clear() {
             free_mem();
+        }
+
+
+        // Iterator
+        iterator begin() {
+            return iterator(head_);
+        }
+
+        iterator end() {
+            return iterator(nullptr);
+        }
+
+        void insert(iterator pos, const T& val) {
+
+            if (pos == begin()) {
+                push_front(val);
+                return; 
+            }
+
+            if (pos == end()) {
+                push_back(val);
+                return;
+            }
+
+            // If pos is in the middle of the list
+            Node* curr = pos.cur_;
+            Node* temp = new Node(val);
+
+            temp->next = curr;
+            temp->prev = curr->prev;
+
+            curr->prev->next = temp;
+            curr->prev = temp;
+
+            size_++;
         }
 
 };
