@@ -230,6 +230,32 @@ class DoublyLinkedList {
             size_++;
         }
 
+        iterator erase(iterator pos) {
+            Node* nodeToDelete = pos.current_;
+            Node* retNode = nodeToDelete->next;
+
+            if (!nodeToDelete) return pos; 
+
+            if (nodeToDelete == head_) {
+                pop_front();
+                return iterator(head_); 
+            }
+
+            if (nodeToDelete == tail_) {
+                pop_back();
+                return iterator(tail_); 
+            }
+
+            // General case
+            nodeToDelete->prev->next = nodeToDelete->next;
+            nodeToDelete->next->prev = nodeToDelete->prev;
+
+            delete nodeToDelete;
+            size_--;
+
+            return iterator(retNode);
+        }
+
 };
 
 
