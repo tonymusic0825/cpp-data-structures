@@ -21,6 +21,19 @@ A template-based bi-directional linked list.
 - **Operations:** Efficient `push_front`, `push_back`, `pop_front`, `pop_back`, `insert`, and `erase` operations.
 - **Resource Safety:** Uses a private `free_mem()` helper to ensure all nodes are properly deallocated during destruction or reassignment.
 
+### 3. Hash Map (`CustomMap`)
+A template-based associative container that maps unique keys to values using **Separate Chaining** for collision resolution. This implementation marks the transition from simple data storage to high-performance data retrieval.
+- **Internal Architecture:** An array (vector) of buckets, where each bucket is a linked list storing `KeyValuePair` structs. This utilizes the "Hardcore" pipeline: **Hash** (std::hash) -> **Compress** (modulo) -> **Search** (list traversal).
+- **Dynamic Rehash:** Implements a sophisticated `rehash()` function. When the **Load Factor** ($\frac{size}{capacity}$) exceeds the threshold (0.75), the map automatically doubles its internal array and migrates all existing elements. 
+- **Move Semantics:** Leveraging the "Rule of Five," the rehash process uses `std::move` to transfer key-value pairs between buckets, avoiding expensive deep copies of complex data types.
+- **API Features:**
+    - `operator[]`: Implements the standard "access or insert" logic.
+    - `at()`: Provides bounds-checked access with `std::out_of_range` exceptions.
+    - `erase()`: Handles manual memory management within buckets during node removal.
+- **Health Metrics:** Includes methods to monitor the map's "stress level" via `load_factor()` and `max_load_factor()`.
+
+---
+
 ## Tech Stack & Environment
 - **Language:** C++17 (or higher)
 - **Compiler:** GCC/Clang
@@ -32,4 +45,5 @@ A template-based bi-directional linked list.
 cpp-data-structures/
 ├── dynamicArray.cpp       # Dynamic array implementation & benchmarks
 ├── doublyLinkedList.cpp   # Doubly linked list & iterator implementation
+├── hashMap.cpp            # Hash map with separate chaining & rehash logic
 └── README.md              # Project documentation
