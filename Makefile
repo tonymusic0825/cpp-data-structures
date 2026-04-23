@@ -4,8 +4,8 @@ CXXFLAGS = -Wall -Wextra -g -Wpedantic -O3
 
 all: main
 
-main: customMap.cpp
-	$(CXX) $(CXXFLAGS) -o main customMap.cpp
+main: vvMap.cpp
+	$(CXX) $(CXXFLAGS) -o main vvMap.cpp
 
 clean:
 	rm -f main
