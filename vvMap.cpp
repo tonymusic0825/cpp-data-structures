@@ -80,6 +80,28 @@ class vvMap {
                 }
             }
 
+            // Add key if it doesn't exist
+            // Check load factor
+            if (loadf_ <= (float) size_ / capacity_) {
+                rehash(capacity_*2);
+                idx = get_hash(key, capacity_);
+            }
+
+            table_[idx].emplace_back(key, V());
+            size_++; 
+
+            return table_[idx].back().value;
+        }
+
+        V& at(const K& key) {
+            size_t idx = get_hash(key, capacity_);
+
+            for (Pair& pair : table_[idx]) {
+                if (pair.key == key) {
+                    return pair.value;
+                }
+            }
+
             throw std::out_of_range("Key not found in vvMap operator[]");
         }
 
