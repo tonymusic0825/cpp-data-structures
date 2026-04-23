@@ -49,7 +49,40 @@ class vvMap {
             table_ = std::move(new_table);
             capacity_ = new_cap; 
         }
-        
+
+        void insert(const K& key, const V& value) {
+            // Check load factor and resize
+            if (loadf_ <= (float) size_ / capacity_) {
+                rehash(capacity_*2);
+            }
+
+            // Check if key already exists
+            size_t idx = get_hash(key, capacity_);
+            vector<Pair>& bucket = table_[idx];
+
+            for (Pair& pair : bucket) {
+                if (pair.key == key) {
+                    pair->value = value;
+                    return;
+                }
+            }
+
+            bucket.emplace_back(key, value);
+            size_++;
+        }
+
+        V& operator[](const K& key) {
+            size_t idx = get_hash(key, capacity_);
+
+            for (Pair& pair : table_[idx]) {
+                if (pair.key == key) {
+                    return pair.value;
+                }
+            }
+
+            throw std::out_of_range("Key not found in vvMap operator[]");
+        }
+
 };
 
 int main() {
