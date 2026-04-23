@@ -105,6 +105,22 @@ class vvMap {
             throw std::out_of_range("Key not found in vvMap operator[]");
         }
 
+        bool erase(const K& key) {
+            size_t idx = get_hash(key, capacity_);
+            vector<Pair>& bucket = table_[idx];
+
+            for (auto it = bucket.begin(); it != bucket.end(); ++it) {
+                if (it->key == key) {
+                    *it = std::move(bucket.back());
+                    bucket.pop_back();
+                    size_--;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
 };
 
 int main() {
