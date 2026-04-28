@@ -68,35 +68,12 @@ class CustomHashMap {
 
         // Destructor 
         ~CustomHashMap() {
-            for (size_t i = 0; i < capacity_; ++i) {
-                Node* curr = buckets_[i];
-                while (curr) {
-                    Node* temp = curr;
-                    curr = curr->next;
-                    delete temp;
-                }
-            }
-            delete[] buckets_;
+            deleteBuckets();
         }
 
         // Copy Constructor 
         CustomHashMap(const CustomHashMap& other) {
-            capacity_ = other.capacity_;
-            size_ = other.size_;
-            max_load_factor_ = other.max_load_factor_;
-
-            buckets_ = new Node*[capacity_]();
-
-            for (size_t i = 0; i < capacity_; ++i) {
-                Node* curr = other.buckets_[i];
-                Node** tail = &buckets_[i];
-
-                while (curr) {
-                    *tail = new Node(curr->key, curr->value);
-                    tail = &((*tail)->next);
-                    curr = curr->next;
-                }
-            }
+            copyFrom(other);
         }
 
         // Move Constructor 
@@ -112,21 +89,26 @@ class CustomHashMap {
         }
 
         CustomHashMap& operator=(const CustomHashMap& other) {
-
-            for (size_t i = 0; i < capacity_; ++i) {
-                Node* curr = buckets_[i];
-                while (curr) {
-                    Node* temp = curr;
-                    curr = curr->next;
-                    delete temp;
-                }
+            if (this != &other) {
+                deleteBuckets();
+                copyFrom(other);
             }
-            delete[] buckets_;
-            
-            if (this == &other) return *this;
+            return *this;
+        }
 
-            deleteBuckets();
-            copyFrom(other);
+        CustomHashMap& operator=(CustomHashMap&& other) noexcept {
+            if (this != &other) {
+                deleteBuckets();
+
+                buckets_ = other.buckets_;
+                capacity_ = other.capacity_;
+                size_ = other.size_;
+                max_load_factor_ = other.max_load_factor_;
+
+                other.buckets_ = nullptr;
+                other.capacity_ = 0;
+                other.size_ = 0;
+            }
             return *this;
         }
 };
